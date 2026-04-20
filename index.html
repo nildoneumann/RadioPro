@@ -92,16 +92,17 @@ button{
 <body>
 
 <header>🎧 Radio PRO</header>
-
-
 <div style="padding:10px; display:flex; gap:10px;">
-  
-  <input 
+<input 
     id="busca" 
     placeholder="Buscar rádio ou país..." 
     oninput="buscarRadio(); autocomplete();"
-    style="flex:1; padding:10px; border-radius:10px; border:none;"
+    style="flex:1; padding:8px; border-radius:10px; border:none; font-weight:bold;"
   >
+</div>
+
+<div style="padding:10px; display:flex; gap:10px;">
+  
 <button onclick="mostrarHistorico()">🕘 Recentes</button>
 <div id="sugestoes" style="
   position:absolute;
@@ -112,7 +113,7 @@ button{
   border-radius:10px;
 "></div>
 
-  <select onchange="buscarGenero(this.value)" style="padding:10px; border-radius:10px;">
+  <select onchange="buscarGenero(this.value)" style="padding:5px 2px; border-radius:10px; font-weight:bold;">
     <option value="">Gênero</option>
     <option value="rock">Rock</option>
     <option value="pop">Pop</option>
@@ -120,7 +121,7 @@ button{
     <option value="news">Notícias</option>
     <option value="sertanejo">Sertanejo</option>
   </select>
-<select onchange="buscarPais(this.value)">
+<select onchange="buscarPais(this.value)" style="padding:5px 2px; border-radius:10px; font-weight:bold;">
   <option value="">País</option>
   <option value="brazil">Brasil</option>
   <option value="united states">EUA</option>
