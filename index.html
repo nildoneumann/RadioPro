@@ -69,11 +69,13 @@ header{
 }
 
 button{
-  background:#22c55e;
+  background:green;
   border:none;
   padding:8px;
   border-radius:8px;
   color:white;
+  font-weight:bold;
+  border:1px solid white;
 }
 
 /* ANIMAÇÃO */
@@ -113,7 +115,7 @@ button{
   border-radius:10px;
 "></div>
 
-  <select onchange="buscarGenero(this.value)" style="padding:5px 2px; border-radius:10px; font-weight:bold;">
+  <select onchange="buscarGenero(this.value)" style="padding:5px; border-radius:10px; font-weight:bold;">
     <option value="">Gênero</option>
     <option value="rock">Rock</option>
     <option value="pop">Pop</option>
@@ -121,7 +123,7 @@ button{
     <option value="news">Notícias</option>
     <option value="sertanejo">Sertanejo</option>
   </select>
-<select onchange="buscarPais(this.value)" style="padding:5px 2px; border-radius:10px; font-weight:bold;">
+<select onchange="buscarPais(this.value)" style="padding:5px; border-radius:10px; font-weight:bold;">
   <option value="">País</option>
   <option value="brazil">Brasil</option>
   <option value="united states">EUA</option>
