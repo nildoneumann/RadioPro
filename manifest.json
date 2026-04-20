@@ -1,7 +1,8 @@
 {
   "name": "Radio PRO",
   "short_name": "Radio",
-  "start_url": ".",
+  "start_url": "index.html",
+    "scope": "./",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#22c55e",
