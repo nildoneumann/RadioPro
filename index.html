@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radio PRO</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+}
+
+/* HEADER */
+header{
+  padding:15px;
+  text-align:center;
+  font-size:20px;
+  background:#020617;
+}
+
+/* GRID */
+.container{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+  padding:10px;
+}
+
+.card{
+  background:#1e293b;
+  padding:10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+/* PLAYER */
+.player{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#020617;
+  padding:10px;
+}
+
+.cover{
+  height:50px;
+  width:50px;
+  border-radius:8px;
+  background:#333;
+  margin-right:10px;
+}
+
+.player-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.info{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+button{
+  background:#22c55e;
+  border:none;
+  padding:8px;
+  border-radius:8px;
+  color:white;
+}
+
+/* ANIMAÇÃO */
+.playing{
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.05);}
+  100%{transform:scale(1);}
+}
+</style>
+</head>
+
+<body>
+
+<header>🎧 Radio PRO</header>
+
+
+<div style="padding:10px; display:flex; gap:10px;">
+  
+  <input 
+    id="busca" 
+    placeholder="Buscar rádio ou país..." 
+    oninput="buscarRadio(); autocomplete();"
+    style="flex:1; padding:10px; border-radius:10px; border:none;"
+  >
+<button onclick="mostrarHistorico()">🕘 Recentes</button>
+<div id="sugestoes" style="
+  position:absolute;
+  background:#1e293b;
+  width:90%;
+  max-height:200px;
+  overflow:auto;
+  border-radius:10px;
+"></div>
+
+  <select onchange="buscarGenero(this.value)" style="padding:10px; border-radius:10px;">
+    <option value="">Gênero</option>
+    <option value="rock">Rock</option>
+    <option value="pop">Pop</option>
+    <option value="gospel">Gospel</option>
+    <option value="news">Notícias</option>
+    <option value="sertanejo">Sertanejo</option>
+  </select>
+<select onchange="buscarPais(this.value)">
+  <option value="">País</option>
+  <option value="brazil">Brasil</option>
+  <option value="united states">EUA</option>
+  <option value="argentina">Argentina</option>
+  <option value="spain">Espanha</option>
+</select>
+
+</div>
+
+<div class="container" id="lista"></div>
+
+<div class="player">
+  <div class="player-top">
+    
+    <div class="info">
+      <div class="cover" id="cover"></div>
+      <div>
+        <div id="radioNome">Nenhuma rádio</div>
+        <small id="musica">---</small>
+      </div>
+    </div>
+
+    <button onclick="toggle()">▶️</button>
+  </div>
+
+  <input type="range" min="0" max="1" step="0.01" onchange="audio.volume=this.value">
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+const lista = document.getElementById("lista");
+const audio = document.getElementById("audio");
+
+let historico = JSON.parse(localStorage.getItem("hist")) || [];
+
+/* API */
+async function carregar(){
+  const res = await fetch("https://de1.api.radio-browser.info/json/stations/topclick/30");
+  const data = await res.json();
+
+  render(data);
+}
+
+let timeout;
+
+function buscarRadio(){
+  clearTimeout(timeout);
+
+  timeout = setTimeout(async ()=>{
+    const termo = document.getElementById("busca").value;
+
+    if(termo.length < 2){
+      carregar(); // volta lista inicial
+      return;
+    }
+
+    const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&limit=40`);
+    const data = await res.json();
+
+    render(data);
+  }, 400);
+}
+
+async function buscarGenero(tag){
+  if(!tag) return;
+
+  const res = await fetch(`https://de1.api.radio-browser.info/json/stations/bytag/${tag}?limit=40`);
+  const data = await res.json();
+
+  render(data);
+}
+
+/* RENDER */
+function render(radios){
+  lista.innerHTML="";
+
+  radios.forEach(r=>{
+    const div = document.createElement("div");
+    div.className="card";
+    div.innerHTML = `<strong>${r.name}</strong><br>${r.country}`;
+
+    div.onclick = ()=>playRadio(r);
+
+    lista.appendChild(div);
+  });
+}
+
+/* PLAY */
+function playRadio(r){
+  audio.src = r.url_resolved;
+  audio.play();
+
+  document.getElementById("radioNome").innerText = r.name;
+
+  // histórico (base IA futura)
+  historico.push(r.tags);
+  localStorage.setItem("hist", JSON.stringify(historico));
+
+  // capa fake (pode trocar por API depois)
+  document.getElementById("cover").style.background = "#22c55e";
+}
+
+/* PLAY/PAUSE */
+function toggle(){
+  if(audio.paused){
+    audio.play();
+  }else{
+    audio.pause();
+  }
+}
+
+/* METADADOS (se a rádio enviar) */
+audio.addEventListener("timeupdate", ()=>{
+  if(audio.metadata){
+    document.getElementById("musica").innerText = audio.metadata.title;
+  }
+});
+
+/* PWA */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+
+/* AUTOLOAD */
+carregar();
+
+/* AUTOCOMPLETE */
+async function autocomplete(){
+  const termo = document.getElementById("busca").value;
+
+  if(termo.length < 2){
+    document.getElementById("sugestoes").innerHTML="";
+    return;
+  }
+
+  const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&limit=5`);
+  const data = await res.json();
+
+  let html = "";
+
+  data.forEach(r=>{
+    html += `<div onclick='selecionarSugestao("${r.name}")' style="padding:8px; cursor:pointer;">
+      ${r.name}
+    </div>`;
+  });
+
+  document.getElementById("sugestoes").innerHTML = html;
+}
+
+function selecionarSugestao(nome){
+  document.getElementById("busca").value = nome;
+  document.getElementById("sugestoes").innerHTML="";
+  buscarRadio();
+}
+
+/* BUSCAR PAÍS */
+async function buscarPais(pais){
+  if(!pais) return;
+
+  const res = await fetch(`https://de1.api.radio-browser.info/json/stations/bycountry/${pais}?limit=40`);
+  const data = await res.json();
+
+  render(data);
+}
+
+
+function playRadio(r){
+  audio.src = r.url_resolved;
+  audio.play();
+
+  document.getElementById("radioNome").innerText = r.name;
+
+  // salvar histórico
+  let hist = JSON.parse(localStorage.getItem("historico")) || [];
+
+  hist.unshift(r);
+  hist = hist.slice(0,10);
+
+  localStorage.setItem("historico", JSON.stringify(hist));
+  localStorage.setItem("ultima", JSON.stringify(r));
+}
+function mostrarHistorico(){
+  const hist = JSON.parse(localStorage.getItem("historico")) || [];
+  render(hist);
+}
+
+window.onload = ()=>{
+  carregar();
+
+  const ultima = JSON.parse(localStorage.getItem("ultima"));
+  if(ultima){
+    document.getElementById("radioNome").innerText = "Continuar: " + ultima.name;
+  }
+}
+
+</script>
+
+</body>
+</html>
