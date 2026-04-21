@@ -191,17 +191,25 @@ function buscarRadio(){
 
 
 /* RENDER */
-function render(radios){
+function render(radios, modo="normal"){
   lista.innerHTML="";
 
   radios.forEach((r, index)=>{
     const div = document.createElement("div");
     div.className="card";
 
+    let botoes = "";
+
+    if(modo === "favoritos"){
+      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:red">🗑️ Remover</button>`;
+    } else {
+      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})">⭐</button>`;
+    }
+
     div.innerHTML = `
       <strong>${r.name}</strong><br>${r.country}
-      
-      <button onclick="event.stopPropagation(); favoritar(${index})">⭐</button>
+      <br><br>
+      ${botoes}
     `;
 
     div.onclick = ()=>playRadio(r);
@@ -209,7 +217,6 @@ function render(radios){
     lista.appendChild(div);
   });
 
-  // salva lista atual globalmente
   window.radiosAtuais = radios;
 }
 
@@ -352,7 +359,17 @@ function favoritar(index){
 }
 function mostrarFavoritos(){
   const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-  render(favoritos);
+  render(favoritos, "favoritos");
+}
+
+  function removerFavorito(url){
+  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+  favoritos = favoritos.filter(r => r.url_resolved !== url);
+
+  localStorage.setItem("favoritos", JSON.stringify(favoritos));
+
+  mostrarFavoritos(); // atualiza a tela
 }
 
 </script>
