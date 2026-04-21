@@ -181,7 +181,7 @@ function buscarRadio(){
       return;
     }
 
-    const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&limit=50`);
+    const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&countrycode=BR&limit=50&order=clickcount&reverse=true`);
     const data = await res.json();
 
     render(data);
