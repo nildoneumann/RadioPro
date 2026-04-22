@@ -99,7 +99,7 @@ button{
 <div style="padding:10px; display:flex; gap:10px;">
 <input 
     id="busca" 
-    placeholder="Buscar rádio ou país..." 
+    placeholder="Buscar rádio ou gênero..." 
     oninput="buscarRadio(); autocomplete();"
     style="flex:1; padding:8px; border-radius:10px; border:none; font-weight:bold;"
   >
@@ -107,8 +107,8 @@ button{
 
 <div style="padding:10px; display:flex; gap:10px;">
   
-<button onclick="mostrarHistorico()">🕘 Histórico</button>
-<button onclick="mostrarFavoritos()">⭐ Favoritos</button>
+<button onclick="mostrarHistorico()" style="padding:5px">🕘 Histórico</button>
+<button onclick="mostrarFavoritos()" style="padding:5px">⭐ Favoritos</button>
 <div id="sugestoes" style="
   position:absolute;
   background:#1e293b;
@@ -188,8 +188,6 @@ function buscarRadio(){
   }, 400);
 }
 
-
-
 /* RENDER */
 function render(radios, modo="normal"){
   lista.innerHTML="";
@@ -208,7 +206,7 @@ function render(radios, modo="normal"){
 
     div.innerHTML = `
       <strong>${r.name}</strong><br>${r.country}
-      <br><br>
+      <br>
       ${botoes}
     `;
 
