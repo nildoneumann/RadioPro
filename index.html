@@ -73,7 +73,7 @@ header{
 button{
   background:green;
   border:none;
-  padding:8px;
+  padding:5px;
   border-radius:8px;
   color:white;
   font-weight:bold;
@@ -107,8 +107,8 @@ button{
 
 <div style="padding:10px; display:flex; gap:10px;">
   
-<button onclick="mostrarHistorico()" style="padding:5px">🕘 Histórico</button>
-<button onclick="mostrarFavoritos()" style="padding:5px">⭐ Favoritos</button>
+<button onclick="mostrarHistorico()">🕘 Histórico</button>
+<button onclick="mostrarFavoritos()">⭐ Favoritos</button>
 <div id="sugestoes" style="
   position:absolute;
   background:#1e293b;
@@ -119,7 +119,7 @@ button{
 </div>
 <div style="margin-top:5px; display:flex; gap:5px;">
   
-  <select onchange="definirTimer(this.value)" style="flex:1; padding:8px; border-radius:8px;">
+  <select onchange="definirTimer(this.value)" style="flex:1; border-radius:8px;">
     <option value="">⏱️ Sleep Timer</option>
     <option value="900">15 minutos</option>
     <option value="1800">30 minutos</option>
@@ -127,7 +127,7 @@ button{
     <option value="7200">2 hora</option>
   </select>
 
-  <button onclick="cancelarTimer()"style="background:red;">Cancelar Timer</button>
+  <button onclick="cancelarTimer()"style="background:red">Cancelar Timer</button>
 
 </div>
 
@@ -199,9 +199,9 @@ function render(radios, modo="normal"){
     let botoes = "";
 
     if(modo === "favoritos"){
-      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:red">🗑️ Remover</button>`;
+      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:darkred; padding:5px 3px; font-size:13px">🗑️excluir</button>`;
     } else {
-      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})">⭐</button>`;
+      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="background:black; font-size:13px">⭐</button>`;
     }
 
     div.innerHTML = `
