@@ -94,14 +94,14 @@ button{
 </head>
 
 <body>
-
+<label for="nome" style="font-size: 8px; margin-left: 10px">© 2026 Leonildo.Neumann</label>
 <header>🎧 Radio PRO</header>
 <div style="padding:10px; display:flex; gap:10px;">
 <input 
     id="busca" 
     placeholder="Buscar rádio ou gênero..." 
     oninput="buscarRadio(); autocomplete();"
-    style="flex:1; padding:8px; border-radius:10px; border:none; font-weight:bold;"
+    style="flex:1; padding:5px 8px; border-radius:10px; border:none; font-weight:bold; font-size:16px"
   >
 </div>
 
@@ -199,9 +199,9 @@ function render(radios, modo="normal"){
     let botoes = "";
 
     if(modo === "favoritos"){
-      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:darkred; padding:6px 3px; font-size:13px">🗑️excluir</button>`;
+      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:darkred; padding:7px 3px; font-size:13px">🗑️excluir</button>`;
     } else {
-      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="background:black; padding:6px; font-size:13px">⭐</button>`;
+      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="background:black; padding:7px; font-size:13px">⭐</button>`;
     }
 
     div.innerHTML = `
