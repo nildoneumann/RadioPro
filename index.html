@@ -71,7 +71,7 @@ header{
 }
 
 button{
-  background:green;
+  background:black;
   border:none;
   padding:5px;
   border-radius:8px;
@@ -101,7 +101,7 @@ button{
     id="busca" 
     placeholder="Buscar rádio ou gênero..." 
     oninput="buscarRadio(); autocomplete();"
-    style="flex:1; padding:5px 8px; border-radius:10px; border:none; font-weight:bold; font-size:16px"
+    style="flex:1; padding:5px 8px; border-radius:10px; border:none; font-weight:bold; font-size:17px"
   >
 </div>
 
@@ -162,7 +162,7 @@ let historico = JSON.parse(localStorage.getItem("hist")) || [];
 
 /* API */
 async function carregar(){
-  const res = await fetch("https://de1.api.radio-browser.info/json/stations/bycountry/brazil?limit=60&hidebroken=true&order=clickcount&reverse=true");
+  const res = await fetch("https://de1.api.radio-browser.info/json/stations/bycountry/brazil?limit=70&hidebroken=true&order=clickcount&reverse=true");
   const data = await res.json();
 
   render(data);
@@ -201,7 +201,7 @@ function render(radios, modo="normal"){
     if(modo === "favoritos"){
       botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:darkred; padding:7px 3px; font-size:13px">🗑️excluir</button>`;
     } else {
-      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="background:black; padding:7px; font-size:13px">⭐</button>`;
+      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="padding:7px; font-size:13px">⭐</button>`;
     }
 
     div.innerHTML = `
