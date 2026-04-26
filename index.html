@@ -146,7 +146,7 @@ button{
       </div>
     </div>
 
-    <button onclick="toggle()">▶️</button>
+    <button onclick="toggle()" style="padding:3px; font-size:17px">▶️</button>
   </div>
 
   <input type="range" min="0" max="1" step="0.01" onchange="audio.volume=this.value">
@@ -201,12 +201,12 @@ function render(radios, modo="normal"){
     if(modo === "favoritos"){
       botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:darkred; padding:7px 3px; font-size:13px">🗑️excluir</button>`;
     } else {
-      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="padding:7px; font-size:13px">⭐</button>`;
+      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="padding:3px; font-size:17px">⭐</button>`;
     }
 
     div.innerHTML = `
-      <strong>${r.name}</strong><br>${r.country}
-      <button onclick="toggle()" style="padding:7px; font-size:13px; background:white">▶️</button>
+      <strong>${r.name}</strong>
+      <br>
       ${botoes}
     `;
 
