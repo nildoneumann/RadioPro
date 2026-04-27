@@ -31,6 +31,7 @@ header{
   grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:10px;
   padding:10px;
+  margin-bottom:90px;
 }
 
 .card{
@@ -108,7 +109,7 @@ button{
 <div style="padding:10px; display:flex; gap:10px;">
   
 <button onclick="mostrarHistorico()" style="background:blue">🕘 Histórico</button>
-<button onclick="mostrarFavoritos()">⭐ Favoritos</button>
+<button onclick="mostrarFavoritos()">❤️ Favoritos</button>
 <div id="sugestoes" style="
   position:absolute;
   background:#1e293b;
@@ -199,9 +200,9 @@ function render(radios, modo="normal"){
     let botoes = "";
 
     if(modo === "favoritos"){
-      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="background:darkred; padding:7px 3px; font-size:13px">🗑️excluir</button>`;
+      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="padding:3px; font-size:17px">❤️</button>`;
     } else {
-      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="padding:3px; font-size:17px">⭐</button>`;
+      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="padding:3px; font-size:17px">🤍</button>`;
     }
 
     div.innerHTML = `
@@ -350,7 +351,7 @@ function favoritar(index){
   if(!jaExiste){
     favoritos.unshift(radio);
     localStorage.setItem("favoritos", JSON.stringify(favoritos));
-    alert("⭐ Adicionado aos favoritos");
+    alert("❤️ Adicionado aos favoritos");
   }else{
     alert("Essa rádio já está nos favoritos");
   }
