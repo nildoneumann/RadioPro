@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clima App</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  color:#fff;
+  background:#0f172a;
+  transition:0.5s;
+}
+
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:15px;
+}
+
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:10px;
+}
+
+.top{
+  display:flex;
+  gap:10px;
+}
+
+input{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+}
+
+button{
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.city{font-size:22px;}
+.temp{font-size:50px;font-weight:bold;}
+
+.forecast div{
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  padding:5px 0;
+}
+
+.fav{
+  cursor:pointer;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card top">
+  <input id="search" placeholder="Buscar cidade...">
+  <button onclick="buscar()">🔍</button>
+  <button onclick="gps()">📍</button>
+</div>
+
+<div class="card">
+  <div class="city" id="city">--</div>
+  <div class="temp" id="temp">--</div>
+  <div id="desc"></div>
+  <div class="fav" onclick="favoritar()">⭐ Favoritar</div>
+</div>
+
+<div class="card">
+  <canvas id="grafico"></canvas>
+</div>
+
+<div class="card forecast" id="forecast"></div>
+
+<div class="card">
+  <h3>⭐ Favoritos</h3>
+  <div id="listaFav"></div>
+</div>
+
+</div>
+
+<script>
+
+let cidadeAtual = "";
+let chart;
+
+// 🎨 fundo dinâmico
+function setFundo(code){
+  if(code < 3) document.body.style.background = "linear-gradient(#38bdf8,#0ea5e9)";
+  else if(code < 60) document.body.style.background = "#64748b";
+  else document.body.style.background = "#1e293b";
+}
+
+// ⭐ favoritos
+function favoritar(){
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+  if(!fav.includes(cidadeAtual)){
+    fav.push(cidadeAtual);
+    localStorage.setItem("fav", JSON.stringify(fav));
+    renderFav();
+  }
+}
+
+function renderFav(){
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+  const el = document.getElementById("listaFav");
+  el.innerHTML = "";
+
+  fav.forEach(c=>{
+    const d = document.createElement("div");
+    d.innerText = c;
+    d.style.cursor = "pointer";
+    d.onclick = ()=>buscarCidade(c);
+    el.appendChild(d);
+  });
+}
+
+// 🔍 buscar cidade
+async function buscar(){
+  const nome = document.getElementById("search").value;
+
+  const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${nome}`);
+  const geoData = await geo.json();
+
+  if(!geoData.results){
+    alert("Cidade não encontrada");
+    return;
+  }
+
+  const {latitude, longitude, name} = geoData.results[0];
+  carregar(latitude, longitude, name);
+}
+
+// 📍 GPS
+function gps(){
+  navigator.geolocation.getCurrentPosition(p=>{
+    carregar(p.coords.latitude, p.coords.longitude, "Sua localização");
+  });
+}
+
+// 🌦️ carregar clima
+async function carregar(lat, lon, nome){
+
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation,precipitation_probability,temperature_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`
+  );
+
+  const data = await res.json();
+
+  cidadeAtual = nome;
+
+  // 🔥 data local correta
+  const hoje = new Date().toLocaleDateString("en-CA");
+
+  // 🔥 índice da hora mais confiável
+  const agora = new Date();
+  const horaAtual = agora.toISOString().slice(0,13);
+  let index = data.hourly.time.findIndex(t => t.startsWith(horaAtual));
+  if(index === -1) index = 0;
+
+  const chuva = data.hourly.precipitation[index] ?? 0;
+  const prob = data.hourly.precipitation_probability[index] ?? 0;
+
+  document.getElementById("city").innerText = nome;
+  document.getElementById("temp").innerText = data.current_weather.temperature + "°C";
+  document.getElementById("desc").innerText = `🌧️ ${chuva} mm | ☔ ${prob}%`;
+
+  setFundo(data.current_weather.weathercode);
+
+  // 📊 gráfico
+  const horas = data.hourly.time.slice(index, index+12)
+    .map(h=>h.split("T")[1].slice(0,5));
+
+  const chuvaHoras = data.hourly.precipitation.slice(index, index+12);
+
+  if(chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("grafico"),{
+    type:"line",
+    data:{
+      labels:horas,
+      datasets:[{data:chuvaHoras}]
+    }
+  });
+
+  // 📅 previsão corrigida
+  const forecast = document.getElementById("forecast");
+  forecast.innerHTML = "<h3>Previsão</h3>";
+
+  let inicio = data.daily.time.findIndex(d => d >= hoje);
+  if(inicio === -1) inicio = 0;
+
+  data.daily.time.slice(inicio, inicio+5).forEach((dia,i)=>{
+    const real = inicio + i;
+
+    // 🔥 CORREÇÃO PRINCIPAL AQUI
+    const dataLocal = new Date(dia + "T00:00:00");
+
+    const nomeDia =
+      i === 0 ? "Hoje" :
+      i === 1 ? "Amanhã" :
+      dataLocal.toLocaleDateString("pt-BR",{weekday:"long"});
+
+    forecast.innerHTML += `
+      <div>
+        <strong>${nomeDia}</strong><br>
+        🌡️ ${Math.round(data.daily.temperature_2m_max[real])}° /
+        ${Math.round(data.daily.temperature_2m_min[real])}° |
+        🌧️ ${data.daily.precipitation_sum[real]} mm
+      </div>
+    `;
+  });
+
+  renderFav();
+}
+
+// iniciar
+gps();
+
+</script>
+</body>
+</html>
