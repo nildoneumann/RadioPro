@@ -146,7 +146,7 @@ button{
         <small id="musica">---</small>
       </div>
     </div>
-    <button id="btnFav" onclick="toggleFavoritoAtual()" style="font-size:17px; padding:3px">❤️</button>
+    <button id="btnFav" onclick="toggleFavoritoAtual()" style="font-size:17px; padding:3px">🤍</button>
     <button onclick="toggle()" style="font-size:17px; padding:3px; background:white">▶️</button>
   </div>
 
@@ -206,7 +206,7 @@ function render(radios){
       <strong>${r.name}</strong>
       <br>
       <button onclick="event.stopPropagation(); toggleFavorito(${index})" style="font-size:17px; padding:3px">
-        ${isFav ? "🤍" : "❤️"}
+        ${isFav ? "❤️" : "🤍"}
       </button>
     `;
 
@@ -304,7 +304,7 @@ function atualizarBotaoFav(){
 
   const isFav = favoritos.some(r => r.url_resolved === radioAtual.url_resolved);
 
-  document.getElementById("btnFav").innerText = isFav ? "🤍" : "❤️";
+  document.getElementById("btnFav").innerText = isFav ? "❤️" : "🤍";
 }
 
 /* METADADOS */
