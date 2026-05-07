@@ -146,8 +146,8 @@ button{
         <small id="musica">---</small>
       </div>
     </div>
-
-    <button onclick="toggle()" style="padding:3px; font-size:17px">▶️</button>
+    <button id="btnFav" onclick="toggleFavoritoAtual()" style="font-size:17px; padding:3px">❤️</button>
+    <button onclick="toggle()" style="font-size:17px; padding:3px; background:white">▶️</button>
   </div>
 
   <input type="range" min="0" max="1" step="0.01" onchange="audio.volume=this.value">
@@ -160,6 +160,7 @@ const lista = document.getElementById("lista");
 const audio = document.getElementById("audio");
 
 let historico = JSON.parse(localStorage.getItem("hist")) || [];
+let radioAtual = null;
 
 /* API */
 async function carregar(){
@@ -178,7 +179,7 @@ function buscarRadio(){
     const termo = document.getElementById("busca").value;
 
     if(termo.length < 2){
-      carregar(); // volta lista inicial
+      carregar();
       return;
     }
 
@@ -190,25 +191,23 @@ function buscarRadio(){
 }
 
 /* RENDER */
-function render(radios, modo="normal"){
+function render(radios){
   lista.innerHTML="";
 
+  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
   radios.forEach((r, index)=>{
+    const isFav = favoritos.some(f => f.url_resolved === r.url_resolved);
+
     const div = document.createElement("div");
     div.className="card";
-
-    let botoes = "";
-
-    if(modo === "favoritos"){
-      botoes = `<button onclick="event.stopPropagation(); removerFavorito('${r.url_resolved}')" style="padding:3px; font-size:17px">❤️</button>`;
-    } else {
-      botoes = `<button onclick="event.stopPropagation(); favoritar(${index})" style="padding:3px; font-size:17px">🤍</button>`;
-    }
 
     div.innerHTML = `
       <strong>${r.name}</strong>
       <br>
-      ${botoes}
+      <button onclick="event.stopPropagation(); toggleFavorito(${index})" style="font-size:17px; padding:3px">
+        ${isFav ? "🤍" : "❤️"}
+      </button>
     `;
 
     div.onclick = ()=>playRadio(r);
@@ -221,17 +220,22 @@ function render(radios, modo="normal"){
 
 /* PLAY */
 function playRadio(r){
+  radioAtual = r;
+
   audio.src = r.url_resolved;
   audio.play();
 
   document.getElementById("radioNome").innerText = r.name;
 
-  // histórico (base IA futura)
-  historico.push(r.tags);
-  localStorage.setItem("hist", JSON.stringify(historico));
+  // histórico
+  let hist = JSON.parse(localStorage.getItem("historico")) || [];
+  hist.unshift(r);
+  hist = hist.slice(0,10);
 
-  // capa fake (pode trocar por API depois)
-  document.getElementById("cover").style.background = "#22c55e";
+  localStorage.setItem("historico", JSON.stringify(hist));
+  localStorage.setItem("ultima", JSON.stringify(r));
+
+  atualizarBotaoFav();
 }
 
 /* PLAY/PAUSE */
@@ -243,7 +247,67 @@ function toggle(){
   }
 }
 
-/* METADADOS (se a rádio enviar) */
+/* BOTÃO PLAYER ▶️ ⏸️ */
+audio.addEventListener("play", ()=>{
+  document.getElementById("btnPlay").innerText = "⏸️";
+});
+
+audio.addEventListener("pause", ()=>{
+  document.getElementById("btnPlay").innerText = "▶️";
+});
+
+/* FAVORITOS (CARD + PLAYER) */
+function toggleFavorito(index){
+  const radio = window.radiosAtuais[index];
+
+  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+  const existe = favoritos.find(r => r.url_resolved === radio.url_resolved);
+
+  if(existe){
+    favoritos = favoritos.filter(r => r.url_resolved !== radio.url_resolved);
+  }else{
+    favoritos.unshift(radio);
+  }
+
+  localStorage.setItem("favoritos", JSON.stringify(favoritos));
+
+  render(window.radiosAtuais);
+  atualizarBotaoFav();
+}
+
+/* FAVORITO PELO PLAYER */
+function toggleFavoritoAtual(){
+  if(!radioAtual) return;
+
+  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+  const existe = favoritos.find(r => r.url_resolved === radioAtual.url_resolved);
+
+  if(existe){
+    favoritos = favoritos.filter(r => r.url_resolved !== radioAtual.url_resolved);
+  }else{
+    favoritos.unshift(radioAtual);
+  }
+
+  localStorage.setItem("favoritos", JSON.stringify(favoritos));
+
+  atualizarBotaoFav();
+  render(window.radiosAtuais || []);
+}
+
+/* ATUALIZA ÍCONE DO PLAYER */
+function atualizarBotaoFav(){
+  if(!radioAtual) return;
+
+  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+  const isFav = favoritos.some(r => r.url_resolved === radioAtual.url_resolved);
+
+  document.getElementById("btnFav").innerText = isFav ? "🤍" : "❤️";
+}
+
+/* METADADOS */
 audio.addEventListener("timeupdate", ()=>{
   if(audio.metadata){
     document.getElementById("musica").innerText = audio.metadata.title;
@@ -287,37 +351,29 @@ function selecionarSugestao(nome){
   buscarRadio();
 }
 
-
-
-function playRadio(r){
-  audio.src = r.url_resolved;
-  audio.play();
-
-  document.getElementById("radioNome").innerText = r.name;
-
-  // salvar histórico
-  let hist = JSON.parse(localStorage.getItem("historico")) || [];
-
-  hist.unshift(r);
-  hist = hist.slice(0,10);
-
-  localStorage.setItem("historico", JSON.stringify(hist));
-  localStorage.setItem("ultima", JSON.stringify(r));
-}
+/* HISTÓRICO */
 function mostrarHistorico(){
   const hist = JSON.parse(localStorage.getItem("historico")) || [];
   render(hist);
 }
 
+/* FAVORITOS */
+function mostrarFavoritos(){
+  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+  render(favoritos);
+}
+
+/* LOAD */
 window.onload = ()=>{
   carregar();
 
   const ultima = JSON.parse(localStorage.getItem("ultima"));
   if(ultima){
-    document.getElementById("radioNome").innerText = "Continuar: " + ultima.name;
+    document.getElementById("radioNome").innerText = ultima.name;
   }
 }
 
+/* SLEEP TIMER */
 let timerSleep = null;
 
 function definirTimer(segundos){
@@ -329,49 +385,14 @@ function definirTimer(segundos){
     audio.pause();
     alert("⏱️ Rádio desligada automaticamente");
   }, segundos * 1000);
-
-  console.log("Timer definido:", segundos, "segundos");
 }
 
 function cancelarTimer(){
   if(timerSleep){
     clearTimeout(timerSleep);
     timerSleep = null;
-    console.log("Timer cancelado");
   }
 }
-
-function favoritar(index){
-  const radio = window.radiosAtuais[index];
-
-  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-
-  const jaExiste = favoritos.some(r => r.url_resolved === radio.url_resolved);
-
-  if(!jaExiste){
-    favoritos.unshift(radio);
-    localStorage.setItem("favoritos", JSON.stringify(favoritos));
-    alert("❤️ Adicionado aos favoritos");
-  }else{
-    alert("Essa rádio já está nos favoritos");
-  }
-}
-function mostrarFavoritos(){
-  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-  render(favoritos, "favoritos");
-}
-
-  function removerFavorito(url){
-  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-
-  favoritos = favoritos.filter(r => r.url_resolved !== url);
-
-  localStorage.setItem("favoritos", JSON.stringify(favoritos));
-
-  mostrarFavoritos(); // atualiza a tela
-}
-
 </script>
-
 </body>
 </html>
