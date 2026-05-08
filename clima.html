@@ -111,7 +111,7 @@ button{
   <div class="fav" onclick="favoritar()">⭐ Favoritar</div>
 </div>
 
-<div class="card">
+<div class="card" style="background:white">
   <canvas id="grafico"></canvas>
 </div>
 
@@ -234,7 +234,7 @@ async function carregar(lat, lon, nome){
     plugins:{legend:{display:false}},
     scales:{
       x:{grid:{display:false}},
-      y:{grid:{color:"rgba(255,255,255,0.1)"}}
+      y:{grid:{color:"#D3D3D3"}}
     }
   }
 });
