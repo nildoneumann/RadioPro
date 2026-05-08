@@ -1,6 +1,6 @@
 {
   "name": "Radio PRO",
-  "short_name": "Radio",
+  "short_name": "Rádios",
   "start_url": "index.html",
     "scope": "./",
   "display": "standalone",
