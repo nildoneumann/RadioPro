@@ -177,6 +177,26 @@ button{
 <audio id="audio"></audio>
 
 <script>
+const radiosExtras = [
+  {
+    name: "Rádio 92 FM Guarapuava",
+    country: "Brasil",
+    url_resolved: "https://ice.fabricahost.com.br/radio92fm"
+  },
+  {
+    name: "Rádio T Guarapuava",
+    country: "Brasil",
+    url_resolved: "https://e-spo-103.fabricahost.com.br/radiotguarapuava?f=1778354632N01KR734E1XN0YXSYYM51GS3ZHY&tid=01KR734E1XYX7EVZ4HCCERJ9Z0"
+  },
+  {
+    name: "Rádio Massa FM Guarapuava",
+    country: "Brasil",
+    url_resolved: "https://stm01.virtualcast.com.br:8140/massaguarapuava"
+  }
+
+];
+
+  
 const lista = document.getElementById("lista");
 const audio = document.getElementById("audio");
 
@@ -188,7 +208,10 @@ async function carregar(){
   const res = await fetch("https://de1.api.radio-browser.info/json/stations/bycountry/brazil?limit=70&hidebroken=true&order=clickcount&reverse=true");
   const data = await res.json();
 
-  render(data);
+  // mistura API + suas rádios
+  const todas = [...radiosExtras, ...data];
+
+  render(todas);
 }
 
 let timeout;
@@ -197,7 +220,7 @@ function buscarRadio(){
   clearTimeout(timeout);
 
   timeout = setTimeout(async ()=>{
-    const termo = document.getElementById("busca").value;
+    const termo = document.getElementById("busca").value.toLowerCase();
 
     if(termo.length < 2){
       carregar();
@@ -207,7 +230,12 @@ function buscarRadio(){
     const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&countrycode=BR&limit=70&order=clickcount&reverse=true`);
     const data = await res.json();
 
-    render(data);
+    // filtra suas rádios também
+    const extrasFiltradas = radiosExtras.filter(r =>
+      r.name.toLowerCase().includes(termo)
+    );
+
+    render([...extrasFiltradas, ...data]);
   }, 400);
 }
 
