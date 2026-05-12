@@ -152,11 +152,27 @@ function renderFav(){
   el.innerHTML = "";
 
   fav.forEach(c=>{
-    const d = document.createElement("div");
-    d.innerText = c;
-    d.style.cursor = "pointer";
-    d.onclick = ()=>buscarCidade(c);
-    el.appendChild(d);
+    const row = document.createElement("div");
+
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.alignItems = "center";
+    row.style.padding = "6px 0";
+
+    const nome = document.createElement("span");
+    nome.innerText = c;
+    nome.style.cursor = "pointer";
+    nome.onclick = ()=>buscarPorNome(c);
+
+    const btn = document.createElement("span");
+    btn.innerText = "❌";
+    btn.style.cursor = "pointer";
+    btn.onclick = ()=>removerFavorito(c);
+
+    row.appendChild(nome);
+    row.appendChild(btn);
+
+    el.appendChild(row);
   });
 }
 
@@ -271,7 +287,8 @@ async function carregar(lat, lon, nome){
 }
 
 // iniciar
-gps();
+renderFav(); // carrega favoritos imediatamente
+gps();       // depois busca localização
 
 function getIcon(code){
   if(code === 0) return "☀️";
@@ -320,6 +337,15 @@ data.daily.time.slice(inicio, inicio+5).forEach((dia,i)=>{
     </div>
   `;
 });
+
+  function removerFavorito(nome){
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+
+  fav = fav.filter(c => c !== nome);
+
+  localStorage.setItem("fav", JSON.stringify(fav));
+  renderFav();
+}
 
 </script>
 </body>
