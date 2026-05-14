@@ -131,14 +131,7 @@ button{
 let cidadeAtual = "";
 let chart;
 
-// 🎨 fundo dinâmico
-function setFundo(code){
-  if(code < 3) document.body.style.background = "linear-gradient(#38bdf8,#0ea5e9)";
-  else if(code < 60) document.body.style.background = "#64748b";
-  else document.body.style.background = "#1e293b";
-}
-
-// ⭐ favoritos
+// ⭐ FAVORITOS
 function favoritar(){
   let fav = JSON.parse(localStorage.getItem("fav")) || [];
   if(!fav.includes(cidadeAtual)){
@@ -148,6 +141,14 @@ function favoritar(){
   }
 }
 
+function removerFavorito(nome){
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+  fav = fav.filter(c => c !== nome);
+  localStorage.setItem("fav", JSON.stringify(fav));
+  renderFav();
+}
+
+// 🔥 FAVORITOS EM FORMATO DE BOTÃO (CORRIGIDO)
 function renderFav(){
   let fav = JSON.parse(localStorage.getItem("fav")) || [];
   const el = document.getElementById("listaFav");
@@ -159,29 +160,45 @@ function renderFav(){
     row.style.display = "flex";
     row.style.justifyContent = "space-between";
     row.style.alignItems = "center";
-    row.style.padding = "6px 0";
+    row.style.padding = "8px";
+    row.style.marginBottom = "6px";
+    row.style.borderRadius = "10px";
+    row.style.background = "rgba(255,255,255,0.08)";
 
-    const nome = document.createElement("span");
+    const nome = document.createElement("button");
     nome.innerText = c;
+    nome.style.flex = "1";
+    nome.style.background = "transparent";
+    nome.style.border = "none";
+    nome.style.color = "#fff";
+    nome.style.textAlign = "left";
     nome.style.cursor = "pointer";
+
     nome.onclick = ()=>buscarPorNome(c);
 
-    const btn = document.createElement("span");
-    btn.innerText = "❌";
+    const btn = document.createElement("button");
+    btn.innerText = "🗑️";
+    btn.style.marginLeft = "10px";
     btn.style.cursor = "pointer";
-    btn.onclick = ()=>removerFavorito(c);
+
+    btn.onclick = (e)=>{
+      e.stopPropagation();
+      removerFavorito(c);
+    };
 
     row.appendChild(nome);
     row.appendChild(btn);
-
     el.appendChild(row);
   });
 }
 
-// 🔍 buscar cidade
+// 🔍 BUSCAR
 async function buscar(){
   const nome = document.getElementById("search").value;
+  buscarPorNome(nome);
+}
 
+async function buscarPorNome(nome){
   const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${nome}`);
   const geoData = await geo.json();
 
@@ -201,7 +218,19 @@ function gps(){
   });
 }
 
-// 🌦️ carregar clima
+// 🎨 FUNDO
+function setFundo(code){
+  if(code === 0)
+    document.body.style.background = "linear-gradient(160deg,#38bdf8,#0ea5e9)";
+  else if(code <= 3)
+    document.body.style.background = "linear-gradient(160deg,#94a3b8,#64748b)";
+  else if(code < 60)
+    document.body.style.background = "linear-gradient(160deg,#475569,#1e293b)";
+  else
+    document.body.style.background = "linear-gradient(160deg,#0f172a,#020617)";
+}
+
+// 🌦️ CARREGAR CLIMA
 async function carregar(lat, lon, nome){
 
   const res = await fetch(
@@ -212,10 +241,8 @@ async function carregar(lat, lon, nome){
 
   cidadeAtual = nome;
 
-  // 🔥 data local correta
   const hoje = new Date().toLocaleDateString("en-CA");
 
-  // 🔥 índice da hora mais confiável
   const agora = new Date();
   const horaAtual = agora.toISOString().slice(0,13);
   let index = data.hourly.time.findIndex(t => t.startsWith(horaAtual));
@@ -239,25 +266,25 @@ async function carregar(lat, lon, nome){
   if(chart) chart.destroy();
 
   chart = new Chart(document.getElementById("grafico"),{
-  type:"line",
-  data:{
-    labels:horas,
-    datasets:[{
-      data:chuvaHoras,
-      tension:0.4,
-      fill:true
-    }]
-  },
-  options:{
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{grid:{display:false}},
-      y:{grid:{color:"#D3D3D3"}}
+    type:"line",
+    data:{
+      labels:horas,
+      datasets:[{
+        data:chuvaHoras,
+        tension:0.4,
+        fill:true
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:"#D3D3D3"}}
+      }
     }
-  }
-});
+  });
 
-  // 📅 previsão corrigida
+  // 📅 previsão
   const forecast = document.getElementById("forecast");
   forecast.innerHTML = "<h3>Previsão</h3>";
 
@@ -267,12 +294,11 @@ async function carregar(lat, lon, nome){
   data.daily.time.slice(inicio, inicio+5).forEach((dia,i)=>{
     const real = inicio + i;
 
-    // 🔥 CORREÇÃO PRINCIPAL AQUI
     const dataLocal = new Date(dia + "T00:00:00");
 
     const nomeDia =
-      i === 0 ? "Hoje" :
-      i === 1 ? "Amanhã" :
+      i===0 ? "Hoje" :
+      i===1 ? "Amanhã" :
       dataLocal.toLocaleDateString("pt-BR",{weekday:"long"});
 
     forecast.innerHTML += `
@@ -288,66 +314,9 @@ async function carregar(lat, lon, nome){
   renderFav();
 }
 
-// iniciar
-renderFav(); // carrega favoritos imediatamente
-gps();       // depois busca localização
-
-function getIcon(code){
-  if(code === 0) return "☀️";
-  if(code <= 2) return "🌤️";
-  if(code <= 3) return "☁️";
-  if(code < 60) return "🌫️";
-  if(code < 70) return "🌧️";
-  if(code < 80) return "🌨️";
-  return "⛈️";
-}
-function setFundo(code){
-  if(code === 0)
-    document.body.style.background = "linear-gradient(160deg,#38bdf8,#0ea5e9)";
-  else if(code <= 3)
-    document.body.style.background = "linear-gradient(160deg,#94a3b8,#64748b)";
-  else if(code < 60)
-    document.body.style.background = "linear-gradient(160deg,#475569,#1e293b)";
-  else
-    document.body.style.background = "linear-gradient(160deg,#0f172a,#020617)";
-}
-forecast.innerHTML = "<h3>Previsão</h3>";
-
-let inicio = data.daily.time.findIndex(d => d >= hoje);
-if(inicio === -1) inicio = 0;
-
-data.daily.time.slice(inicio, inicio+5).forEach((dia,i)=>{
-  const real = inicio + i;
-
-  const dataLocal = new Date(dia + "T00:00:00");
-
-  const nomeDia =
-    i===0 ? "Hoje" :
-    i===1 ? "Amanhã" :
-    dataLocal.toLocaleDateString("pt-BR",{weekday:"long"});
-
-  const icon = getIcon(data.current_weather.weathercode);
-
-  forecast.innerHTML += `
-    <div class="forecast-item">
-      <div>
-        <strong>${nomeDia}</strong><br>
-        <span class="desc">${Math.round(data.daily.temperature_2m_max[real])}° / ${Math.round(data.daily.temperature_2m_min[real])}°</span>
-      </div>
-      <div class="icon">${icon}</div>
-      <div>${data.daily.precipitation_sum[real]} mm</div>
-    </div>
-  `;
-});
-
-  function removerFavorito(nome){
-  let fav = JSON.parse(localStorage.getItem("fav")) || [];
-
-  fav = fav.filter(c => c !== nome);
-
-  localStorage.setItem("fav", JSON.stringify(fav));
-  renderFav();
-}
+// 🚀 INICIAR
+renderFav();
+gps();
 
 </script>
 </body>
