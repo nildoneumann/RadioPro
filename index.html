@@ -168,7 +168,7 @@ button{
       </div>
     </div>
     <button id="btnFav" onclick="toggleFavoritoAtual()" style="font-size:17px; padding:3px">🤍</button>
-    <button onclick="toggle()" style="font-size:17px; padding:3px; background:white">▶️</button>
+    <button id="btnPlay" onclick="toggle()" style="font-size:17px; padding:3px; background:white">▶️</button>
   </div>
 
   <input type="range" min="0" max="1" step="0.01" onchange="audio.volume=this.value">
@@ -193,27 +193,23 @@ const radiosExtras = [
     country: "Brasil",
     url_resolved: "https://stm01.virtualcast.com.br:8140/massaguarapuava"
   }
-
 ];
 
-  
 const lista = document.getElementById("lista");
 const audio = document.getElementById("audio");
 
-let historico = JSON.parse(localStorage.getItem("hist")) || [];
 let radioAtual = null;
 
-/* API */
+/* CARREGAR */
 async function carregar(){
   const res = await fetch("https://de1.api.radio-browser.info/json/stations/bycountry/brazil?limit=70&hidebroken=true&order=clickcount&reverse=true");
   const data = await res.json();
 
-  // mistura API + suas rádios
   const todas = [...radiosExtras, ...data];
-
   render(todas);
 }
 
+/* BUSCA */
 let timeout;
 
 function buscarRadio(){
@@ -230,7 +226,6 @@ function buscarRadio(){
     const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&countrycode=BR&limit=70&order=clickcount&reverse=true`);
     const data = await res.json();
 
-    // filtra suas rádios também
     const extrasFiltradas = radiosExtras.filter(r =>
       r.name.toLowerCase().includes(termo)
     );
@@ -245,7 +240,7 @@ function render(radios){
 
   const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
-  radios.forEach((r, index)=>{
+  radios.forEach((r)=>{
     const isFav = favoritos.some(f => f.url_resolved === r.url_resolved);
 
     const div = document.createElement("div");
@@ -254,7 +249,7 @@ function render(radios){
     div.innerHTML = `
       <strong>${r.name}</strong>
       <br>
-      <button onclick="event.stopPropagation(); toggleFavorito(${index})" style="font-size:17px; padding:3px">
+      <button onclick="event.stopPropagation(); toggleFavoritoRadio('${r.url_resolved}')">
         ${isFav ? "❤️" : "🤍"}
       </button>
     `;
@@ -289,14 +284,18 @@ function playRadio(r){
 
 /* PLAY/PAUSE */
 function toggle(){
+  const btn = document.getElementById("btnPlay");
+
   if(audio.paused){
     audio.play();
+    btn.innerText = "⏸️";
   }else{
     audio.pause();
+    btn.innerText = "▶️";
   }
 }
 
-/* BOTÃO PLAYER ▶️ ⏸️ */
+/* SINCRONIZA BOTÃO */
 audio.addEventListener("play", ()=>{
   document.getElementById("btnPlay").innerText = "⏸️";
 });
@@ -305,16 +304,16 @@ audio.addEventListener("pause", ()=>{
   document.getElementById("btnPlay").innerText = "▶️";
 });
 
-/* FAVORITOS (CARD + PLAYER) */
-function toggleFavorito(index){
-  const radio = window.radiosAtuais[index];
+/* FAVORITO */
+function toggleFavoritoRadio(url){
+  const radio = window.radiosAtuais.find(r => r.url_resolved === url);
 
   let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
-  const existe = favoritos.find(r => r.url_resolved === radio.url_resolved);
+  const existe = favoritos.find(r => r.url_resolved === url);
 
   if(existe){
-    favoritos = favoritos.filter(r => r.url_resolved !== radio.url_resolved);
+    favoritos = favoritos.filter(r => r.url_resolved !== url);
   }else{
     favoritos.unshift(radio);
   }
@@ -329,23 +328,10 @@ function toggleFavorito(index){
 function toggleFavoritoAtual(){
   if(!radioAtual) return;
 
-  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-
-  const existe = favoritos.find(r => r.url_resolved === radioAtual.url_resolved);
-
-  if(existe){
-    favoritos = favoritos.filter(r => r.url_resolved !== radioAtual.url_resolved);
-  }else{
-    favoritos.unshift(radioAtual);
-  }
-
-  localStorage.setItem("favoritos", JSON.stringify(favoritos));
-
-  atualizarBotaoFav();
-  render(window.radiosAtuais || []);
+  toggleFavoritoRadio(radioAtual.url_resolved);
 }
 
-/* ATUALIZA ÍCONE DO PLAYER */
+/* ATUALIZA ÍCONE */
 function atualizarBotaoFav(){
   if(!radioAtual) return;
 
@@ -356,20 +342,17 @@ function atualizarBotaoFav(){
   document.getElementById("btnFav").innerText = isFav ? "❤️" : "🤍";
 }
 
-/* METADADOS */
-audio.addEventListener("timeupdate", ()=>{
-  if(audio.metadata){
-    document.getElementById("musica").innerText = audio.metadata.title;
-  }
-});
-
-/* PWA */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+/* HISTÓRICO */
+function mostrarHistorico(){
+  const hist = JSON.parse(localStorage.getItem("historico")) || [];
+  render(hist);
 }
 
-/* AUTOLOAD */
-carregar();
+/* FAVORITOS */
+function mostrarFavoritos(){
+  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+  render(favoritos);
+}
 
 /* AUTOCOMPLETE */
 async function autocomplete(){
@@ -400,29 +383,7 @@ function selecionarSugestao(nome){
   buscarRadio();
 }
 
-/* HISTÓRICO */
-function mostrarHistorico(){
-  const hist = JSON.parse(localStorage.getItem("historico")) || [];
-  render(hist);
-}
-
-/* FAVORITOS */
-function mostrarFavoritos(){
-  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-  render(favoritos);
-}
-
-/* LOAD */
-window.onload = ()=>{
-  carregar();
-
-  const ultima = JSON.parse(localStorage.getItem("ultima"));
-  if(ultima){
-    document.getElementById("radioNome").innerText = ultima.name;
-  }
-}
-
-/* SLEEP TIMER */
+/* TIMER */
 let timerSleep = null;
 
 function definirTimer(segundos){
@@ -440,6 +401,21 @@ function cancelarTimer(){
   if(timerSleep){
     clearTimeout(timerSleep);
     timerSleep = null;
+  }
+}
+
+/* PWA */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+
+/* INICIALIZAÇÃO */
+window.onload = ()=>{
+  carregar();
+
+  const ultima = JSON.parse(localStorage.getItem("ultima"));
+  if(ultima){
+    playRadio(ultima); // 🔥 AUTO PLAY
   }
 }
 </script>
