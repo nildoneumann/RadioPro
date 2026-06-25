@@ -1129,7 +1129,14 @@ function renderWeather(data) {
 renderFav();
 gps();
 
-
+/* Disable context menu */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
+    e.preventDefault();
+  }
+});
+  
 </script>
 </body>
 </html>
