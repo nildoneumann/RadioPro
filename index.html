@@ -4,437 +4,1223 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radio PRO</title>
-
 <link rel="manifest" href="manifest.json">
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#0f172a;
-  color:white;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: rgba(255,255,255,0.04);
+  --bg-glass: rgba(17,24,39,0.75);
+  --accent: #22c55e;
+  --accent-glow: rgba(34,197,94,0.25);
+  --accent-secondary: #10b981;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: rgba(255,255,255,0.06);
+  --border-accent: rgba(34,197,94,0.3);
+  --danger: #ef4444;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 30px var(--accent-glow);
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* HEADER */
-header{
-  position:sticky;
-  top:0;
-  background:#15400e;
-  padding:15px 20px;
-  z-index:999;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:2px solid yellow;
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-
-/* GRID */
-.container{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:10px;
-  padding:10px;
-  margin-bottom:90px;
+/* ========== AMBIENT BACKGROUND ========== */
+body::before {
+  content: '';
+  position: fixed;
+  top: -40%; left: -20%;
+  width: 80vw; height: 80vw;
+  background: radial-gradient(circle, rgba(34,197,94,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -30%; right: -15%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.card{
-  background:#0a5c0a;
-  padding:5px;
-  border-radius:12px;
-  cursor:pointer;
-  border-left: 2px solid yellow;
+/* ========== HEADER ========== */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* PLAYER */
-.player{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#020617;
-  padding:10px;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.logo svg { color: var(--accent); flex-shrink: 0; }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 7px 16px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.badge:hover {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--border-accent);
+  color: var(--accent);
 }
 
-.cover{
-  height:50px;
-  width:50px;
-  border-radius:8px;
-  background:#333;
-  margin-right:10px;
+/* ========== TOOLBAR ========== */
+.toolbar {
+  position: relative;
+  z-index: 10;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.player-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: var(--transition);
+}
+.search-wrap input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 500;
+  outline: none;
+  transition: var(--transition);
+}
+.search-wrap input::placeholder { color: var(--text-muted); font-weight: 400; }
+.search-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.search-wrap input:focus ~ svg { color: var(--accent); }
+
+/* Autocomplete */
+#sugestoes {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: var(--shadow-lg);
+  display: none;
+}
+#sugestoes:empty { display: none; }
+#sugestoes:not(:empty) { display: block; }
+#sugestoes div {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+#sugestoes div:last-child { border-bottom: none; }
+#sugestoes div:hover {
+  background: rgba(34,197,94,0.08);
+  color: var(--text-primary);
 }
 
-.info{
-  display:flex;
-  align-items:center;
-  gap:10px;
+/* Filter chips */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  transition: var(--transition);
+  white-space: nowrap;
+  user-select: none;
+}
+.chip:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+.chip.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 600;
 }
 
-button{
-  background:black;
-  border:none;
-  padding:5px;
-  border-radius:8px;
-  color:white;
-  font-weight:bold;
-  border:1px solid white;
+/* Timer row */
+.timer-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.timer-row select {
+  flex: 1;
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+.timer-row select:focus {
+  border-color: var(--accent);
+}
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-sm:hover {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.3);
+  color: var(--danger);
 }
 
-/* ANIMAÇÃO */
-.playing{
-  animation:pulse 1s infinite;
+/* ========== STATION GRID ========== */
+.container {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  padding: 12px 16px 110px;
 }
 
-@keyframes pulse{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.05);}
-  100%{transform:scale(1);}
+.card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.logo{
-  font-size:18px;
-  font-weight:bold;
-  letter-spacing:1px;
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(34,197,94,0.08), transparent 60%);
+  transition: var(--transition);
+}
+.card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+.card:hover::before { opacity: 1; }
+
+.card.active {
+  border-color: var(--accent);
+  background: rgba(34,197,94,0.06);
+  box-shadow: var(--shadow-glow);
 }
 
-.badge{
-  background:#1e293b;
-  padding:4px 12px;
-  border-radius:20px;
-  font-size:16px;
-  font-weight:bold;
-  border:1px solid white;
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.card-icon svg {
+  color: var(--accent);
+  opacity: 0.7;
 }
 
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+.card-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-country {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
 
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 2;
+}
+.btn-fav-card {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  font-size: 14px;
+}
+.btn-fav-card:hover {
+  background: rgba(239,68,68,0.12);
+  color: var(--danger);
+  transform: scale(1.1);
+}
+.btn-fav-card.faved {
+  color: var(--danger);
+}
+
+/* Playing indicator */
+.card.active .card-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  animation: pulse-ring 2s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  100% { box-shadow: 0 0 0 12px transparent; }
+}
+
+/* Equalizer bars on active card */
+.eq-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  opacity: 0;
+  transition: var(--transition);
+}
+.card.active .eq-bars { opacity: 1; }
+.eq-bar {
+  width: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: eq-bounce 0.8s ease-in-out infinite alternate;
+}
+.eq-bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+.eq-bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+.eq-bar:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+.eq-bar:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+
+@keyframes eq-bounce {
+  0% { height: 4px; }
+  100% { height: 16px; }
+}
+
+/* ========== SKELETON ========== */
+.skeleton {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skeleton-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-line.short { width: 60%; }
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ========== PLAYER ========== */
+.player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--bg-glass);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px 14px;
+  transition: var(--transition);
+}
+
+.player-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.player-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+.player-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.player-cover svg {
+  color: var(--accent);
+  opacity: 0.5;
+}
+.player-cover.playing svg {
+  animation: spin-slow 4s linear infinite;
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+.player-info {
+  flex: 1;
+  min-width: 0;
+}
+.player-station {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-status {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+.status-dot.live {
+  background: var(--accent);
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-player {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn-player:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+}
+.btn-player.faved { color: var(--danger); }
+.btn-player.faved:hover { background: rgba(239,68,68,0.1); }
+
+.btn-play {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.btn-play:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+.btn-play:active { transform: scale(0.96); }
+
+/* Volume */
+.player-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.volume-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.volume-icon:hover { color: var(--text-primary); }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: 0 0 8px var(--accent-glow);
+  cursor: pointer;
+  transition: var(--transition);
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+}
+
+/* ========== TOAST ========== */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 0.3s ease-out, toast-out 0.3s ease-in 2.7s forwards;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.toast.success { border-left: 3px solid var(--accent); }
+.toast.info { border-left: 3px solid #3b82f6; }
+.toast.warn { border-left: 3px solid #f59e0b; }
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state svg {
+  color: var(--text-muted);
+  opacity: 0.4;
+  margin-bottom: 16px;
+}
+.empty-state p {
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+/* ========== FOOTER CREDIT ========== */
+.credit {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 90;
+  padding: 2px 12px;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 480px) {
+  .container { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px 10px 110px; }
+  .card { padding: 10px; }
+  .card-name { font-size: 0.76rem; }
+  .card-icon { width: 36px; height: 36px; }
+  header { padding: 0 14px; }
+  .logo { font-size: 1rem; }
+  .player { padding: 10px 12px 12px; }
+  .btn-play { width: 42px; height: 42px; }
+  .player-volume { display: none; }
+}
+@media (min-width: 768px) {
+  .container { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+}
+@media (min-width: 1200px) {
+  .container { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 1200px; margin: 0 auto; }
+  .toolbar { max-width: 1200px; margin: 0 auto; }
+}
+
+/* ========== TRANSITION GROUP ========== */
+.card { animation: card-in 0.35s ease-out both; }
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 </style>
 </head>
-
 <body>
 <label for="nome" style="font-size: 8px; margin-left: 10px">© 2026 Leonildo.Neumann</label>
-<header><div class="logo">📻 Rádios online 🎵</div>
-  <div class="badge"><a href="clima.html" target="_blank" style="color:yellow; text-decoration: none">🌦️ Tempo</a></div>
+<header>
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+    Radio PRO
+  </div>
+  <div class="header-actions">
+    <a href="clima.html" target="_blank" class="badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+      Clima
+    </a>
+  </div>
 </header>
-<div style="padding:10px; display:flex; gap:10px;">
-<input 
-    id="busca" 
-    placeholder="Buscar rádio ou gênero..." 
-    oninput="buscarRadio(); autocomplete();"
-    style="flex:1; padding:5px 8px; border-radius:10px; border:none; font-weight:bold; font-size:17px"
-  >
-</div>
 
-<div style="padding:10px; display:flex; gap:10px;">
-  
-<button onclick="mostrarHistorico()" style="background:blue">🕘 Histórico</button>
-<button onclick="mostrarFavoritos()">❤️ Favoritos</button>
-<div id="sugestoes" style="
-  position:absolute;
-  background:#1e293b;
-  width:90%;
-  max-height:200px;
-  overflow:auto;
-  border-radius:10px;">
-</div>
-<div style="margin-top:5px; display:flex; gap:5px;">
-  
-  <select onchange="definirTimer(this.value)" style="flex:1; border-radius:8px;">
-    <option value="">⏱️ Sleep Timer</option>
-    <option value="900">15 minutos</option>
-    <option value="1800">30 minutos</option>
-    <option value="3600">1 hora</option>
-    <option value="7200">2 hora</option>
-  </select>
+<div class="toolbar">
+  <div class="search-wrap">
+    <input id="busca" placeholder="Buscar rádio ou gênero..." oninput="buscarRadio(); autocomplete();">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <div id="sugestoes"></div>
+  </div>
 
-  <button onclick="cancelarTimer()"style="background:red">Cancelar Timer</button>
+  <div class="filters">
+    <button class="chip active" onclick="filtrar('todas', this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13"/></svg>
+      Todas
+    </button>
+    <button class="chip" onclick="mostrarHistorico(this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Historico
+    </button>
+    <button class="chip" onclick="mostrarFavoritos(this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      Favoritas
+    </button>
+    <button class="chip" onclick="filtrar('top', this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Top
+    </button>
+  </div>
 
-</div>
-
+  <div class="timer-row">
+    <select onchange="definirTimer(this.value)">
+      <option value="">Timer de desligamento</option>
+      <option value="900">15 minutos</option>
+      <option value="1800">30 minutos</option>
+      <option value="3600">1 hora</option>
+      <option value="7200">2 horas</option>
+    </select>
+    <button class="btn-sm" onclick="cancelarTimer()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+      Cancelar
+    </button>
+  </div>
 </div>
 
 <div class="container" id="lista"></div>
 
+<div class="toast-container" id="toasts"></div>
+
 <div class="player">
-  <div class="player-top">
-    
-    <div class="info">
-      <div class="cover" id="cover"></div>
-      <div>
-        <div id="radioNome">Nenhuma rádio</div>
-        <small id="musica">---</small>
+  <div class="player-inner">
+    <div class="player-cover" id="cover">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
+    <div class="player-info">
+      <div class="player-station" id="radioNome">Nenhuma radio selecionada</div>
+      <div class="player-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="musica">Selecione uma radio para ouvir</span>
       </div>
     </div>
-    <button id="btnFav" onclick="toggleFavoritoAtual()" style="font-size:17px; padding:3px">🤍</button>
-    <button id="btnPlay" onclick="toggle()" style="font-size:17px; padding:3px; background:white">▶️</button>
+    <div class="player-controls">
+      <button class="btn-player" id="btnFav" onclick="toggleFavoritoAtual()" aria-label="Favoritar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      </button>
+      <button class="btn-play" id="btnPlay" onclick="toggle()" aria-label="Play/Pause">
+        <svg id="iconPlay" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        <svg id="iconPause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+    </div>
   </div>
-
-  <input type="range" min="0" max="1" step="0.01" onchange="audio.volume=this.value">
+  <div class="player-volume">
+    <span class="volume-icon" onclick="toggleMute()">
+      <svg id="volIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    </span>
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" oninput="setVolume(this.value)">
+  </div>
 </div>
 
-<audio id="audio"></audio>
+<audio id="audio" preload="none"></audio>
+
+<span class="credit">&copy; 2026 Leonildo.Neumann</span>
 
 <script>
 const radiosExtras = [
-  {
-    name: "Rádio 92 FM Guarapuava",
-    country: "Brasil",
-    url_resolved: "https://ice.fabricahost.com.br/radio92fm"
-  },
-  {
-    name: "Coca Cola FM Brasil",
-    country: "Brasil",
-    url_resolved: "https://listen.openstream.co/3908/audio"
-  },
-  {
-    name: "Rádio Mix Fm 94.7 Ponta Grossa",
-    country: "Brasil",
-    url_resolved: "https://27573.live.streamtheworld.com/MIXFM_PTAGROSSA.mp3"
-  },
-  {
-    name: "Massa FM 107,5 Guarapuava",
-    country: "Brasil",
-    url_resolved: "https://stm01.virtualcast.com.br:8140/massaguarapuava"
-  }
+  { name: "Rádio 92 FM Guarapuava", country: "Brasil", favicon: "", url_resolved: "https://ice.fabricahost.com.br/radio92fm" },
+  { name: "Coca Cola FM Brasil", country: "Brasil", favicon: "", url_resolved: "https://listen.openstream.co/3908/audio" },
+  { name: "Rádio Mix Fm 94.7 Ponta Grossa", country: "Brasil", favicon: "", url_resolved: "https://27573.live.streamtheworld.com/MIXFM_PTAGROSSA.mp3" },
+  { name: "Massa FM 107,5 Guarapuava", country: "Brasil", favicon: "", url_resolved: "https://stm01.virtualcast.com.br:8140/massaguarapuava" }
 ];
 
 const lista = document.getElementById("lista");
 const audio = document.getElementById("audio");
+const volumeSlider = document.getElementById("volumeSlider");
 
 let radioAtual = null;
+let todasAsRadios = [];
+let filtroAtual = 'todas';
+let volumeAnterior = 0.8;
 
-/* CARREGAR */
-async function carregar(){
-  const res = await fetch("https://de1.api.radio-browser.info/json/stations/bycountry/brazil?limit=70&hidebroken=true&order=clickcount&reverse=true");
-  const data = await res.json();
+audio.volume = 0.8;
 
-  const todas = [...radiosExtras, ...data];
-  render(todas);
+/* ====== TOAST ====== */
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icons = { success: '&#10003;', info: '&#8505;', warn: '&#9888;' };
+  el.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
 }
 
-/* BUSCA */
-let timeout;
+/* ====== SKELETON ====== */
+function mostrarSkeleton() {
+  lista.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('div');
+    s.className = 'skeleton';
+    s.innerHTML = `<div class="card-top"><div class="skeleton-circle"></div><div style="flex:1"><div class="skeleton-line" style="width:80%"></div><div class="skeleton-line short" style="margin-top:6px"></div></div></div>`;
+    lista.appendChild(s);
+  }
+}
 
-function buscarRadio(){
-  clearTimeout(timeout);
-
-  timeout = setTimeout(async ()=>{
-    const termo = document.getElementById("busca").value.toLowerCase();
-
-    if(termo.length < 2){
-      carregar();
-      return;
-    }
-
-    const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&countrycode=BR&limit=70&order=clickcount&reverse=true`);
+/* ====== CARREGAR ====== */
+async function carregar() {
+  mostrarSkeleton();
+  try {
+    const res = await fetch("https://de1.api.radio-browser.info/json/stations/bycountry/brazil?limit=70&hidebroken=true&order=clickcount&reverse=true");
     const data = await res.json();
+    todasAsRadios = [...radiosExtras, ...data];
+    render(todasAsRadios);
+  } catch (e) {
+    lista.innerHTML = '<div class="empty-state"><p>Erro ao carregar radiodifusoras. Tente novamente.</p></div>';
+  }
+}
 
-    const extrasFiltradas = radiosExtras.filter(r =>
-      r.name.toLowerCase().includes(termo)
-    );
+/* ====== BUSCA ====== */
+let timeout;
+function buscarRadio() {
+  clearTimeout(timeout);
+  const termo = document.getElementById("busca").value.toLowerCase().trim();
 
-    render([...extrasFiltradas, ...data]);
+  if (termo.length < 2) {
+    if (filtroAtual === 'todas') carregar();
+    else filtrar(filtroAtual, document.querySelector('.chip.active'));
+    return;
+  }
+
+  timeout = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(termo)}&countrycode=BR&limit=70&order=clickcount&reverse=true`);
+      const data = await res.json();
+      const extras = radiosExtras.filter(r => r.name.toLowerCase().includes(termo));
+      render([...extras, ...data]);
+    } catch (e) {
+      toast('Erro na busca', 'warn');
+    }
   }, 400);
 }
 
-/* RENDER */
-function render(radios){
-  lista.innerHTML="";
+/* ====== FILTROS ====== */
+function filtrar(tipo, btn) {
+  filtroAtual = tipo;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  if (tipo === 'todas') {
+    if (todasAsRadios.length) render(todasAsRadios); else carregar();
+  } else if (tipo === 'top') {
+    const top = [...todasAsRadios].sort((a, b) => (b.clickcount || 0) - (a.clickcount || 0)).slice(0, 20);
+    render(top);
+  }
+}
+
+function mostrarHistorico(btn) {
+  filtroAtual = 'historico';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const hist = JSON.parse(localStorage.getItem("historico")) || [];
+  render(hist);
+}
+
+function mostrarFavoritos(btn) {
+  filtroAtual = 'favoritos';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const favs = JSON.parse(localStorage.getItem("favoritos")) || [];
+  render(favs);
+}
+
+/* ====== RENDER ====== */
+function render(radios) {
+  lista.innerHTML = '';
+  if (!radios || radios.length === 0) {
+    lista.innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+        <p>Nenhuma radio encontrada</p>
+      </div>`;
+    return;
+  }
 
   const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+  const favUrls = new Set(favoritos.map(f => f.url_resolved));
 
-  radios.forEach((r)=>{
-    const isFav = favoritos.some(f => f.url_resolved === r.url_resolved);
+  radios.forEach((r, i) => {
+    const isFav = favUrls.has(r.url_resolved);
+    const isActive = radioAtual && radioAtual.url_resolved === r.url_resolved;
+    const favicon = r.favicon || '';
 
     const div = document.createElement("div");
-    div.className="card";
+    div.className = "card" + (isActive ? " active" : "");
+    div.style.animationDelay = `${Math.min(i * 30, 400)}ms`;
 
     div.innerHTML = `
-      <strong>${r.name}</strong>
-      <br>
-      <button onclick="event.stopPropagation(); toggleFavoritoRadio('${r.url_resolved}')">
-        ${isFav ? "❤️" : "🤍"}
-      </button>
-    `;
+      <div class="eq-bars">
+        <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      </div>
+      <div class="card-top">
+        <div class="card-icon">
+          ${favicon ? `<img src="${favicon}" onerror="this.remove()" loading="lazy" alt="">` : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
+        </div>
+        <div class="card-info">
+          <div class="card-name">${r.name}</div>
+          ${r.country ? `<div class="card-country">${r.country}</div>` : ''}
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="btn-fav-card ${isFav ? 'faved' : ''}" onclick="event.stopPropagation(); toggleFavoritoRadio('${r.url_resolved}')" aria-label="Favoritar">
+          ${isFav ? '&#9829;' : '&#9825;'}
+        </button>
+      </div>`;
 
-    div.onclick = ()=>playRadio(r);
-
+    div.onclick = () => playRadio(r);
     lista.appendChild(div);
   });
 
   window.radiosAtuais = radios;
 }
 
-/* PLAY */
-function playRadio(r){
+/* ====== PLAY ====== */
+function playRadio(r) {
   radioAtual = r;
-
   audio.src = r.url_resolved;
-  audio.play();
+  audio.play().catch(() => {});
 
   document.getElementById("radioNome").innerText = r.name;
+  document.getElementById("musica").innerText = "Conectando...";
+  document.getElementById("statusDot").classList.remove('live');
 
-  // histórico
+  // Cover image
+  const coverEl = document.getElementById("cover");
+  if (r.favicon) {
+    coverEl.innerHTML = `<img src="${r.favicon}" onerror="this.remove()" alt="">`;
+  } else {
+    coverEl.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
+  }
+
+  // History
   let hist = JSON.parse(localStorage.getItem("historico")) || [];
+  hist = hist.filter(h => h.url_resolved !== r.url_resolved);
   hist.unshift(r);
-  hist = hist.slice(0,10);
-
+  hist = hist.slice(0, 15);
   localStorage.setItem("historico", JSON.stringify(hist));
   localStorage.setItem("ultima", JSON.stringify(r));
 
   atualizarBotaoFav();
+  if (window.radiosAtuais) render(window.radiosAtuais);
+
+  toast(`Sintonizando: ${r.name}`, 'success');
 }
 
-/* PLAY/PAUSE */
-function toggle(){
-  const btn = document.getElementById("btnPlay");
+/* Audio events */
+audio.addEventListener("playing", () => {
+  document.getElementById("iconPlay").style.display = "none";
+  document.getElementById("iconPause").style.display = "block";
+  document.getElementById("musica").innerText = "Ao vivo";
+  document.getElementById("statusDot").classList.add('live');
+  document.getElementById("cover").classList.add('playing');
+});
+audio.addEventListener("pause", () => {
+  document.getElementById("iconPlay").style.display = "block";
+  document.getElementById("iconPause").style.display = "none";
+  document.getElementById("musica").innerText = "Pausada";
+  document.getElementById("statusDot").classList.remove('live');
+  document.getElementById("cover").classList.remove('playing');
+});
+audio.addEventListener("waiting", () => {
+  document.getElementById("musica").innerText = "Carregando...";
+});
+audio.addEventListener("error", () => {
+  document.getElementById("musica").innerText = "Erro de conexao";
+  document.getElementById("statusDot").classList.remove('live');
+  toast('Falha ao conectar a esta radio', 'warn');
+});
 
-  if(audio.paused){
-    audio.play();
-    btn.innerText = "⏸️";
-  }else{
-    audio.pause();
-    btn.innerText = "▶️";
+/* ====== PLAY/PAUSE ====== */
+function toggle() {
+  if (audio.paused) { audio.play().catch(() => {}); }
+  else { audio.pause(); }
+}
+
+/* ====== VOLUME ====== */
+function setVolume(val) {
+  audio.volume = parseFloat(val);
+  volumeAnterior = audio.volume > 0 ? audio.volume : volumeAnterior;
+  atualizarIconeVolume();
+}
+function toggleMute() {
+  if (audio.volume > 0) {
+    volumeAnterior = audio.volume;
+    audio.volume = 0;
+    volumeSlider.value = 0;
+  } else {
+    audio.volume = volumeAnterior;
+    volumeSlider.value = volumeAnterior;
+  }
+  atualizarIconeVolume();
+}
+function atualizarIconeVolume() {
+  const icon = document.getElementById('volIcon');
+  if (audio.volume === 0) {
+    icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+  } else if (audio.volume < 0.5) {
+    icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+  } else {
+    icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
   }
 }
 
-/* SINCRONIZA BOTÃO */
-audio.addEventListener("play", ()=>{
-  document.getElementById("btnPlay").innerText = "⏸️";
-});
-
-audio.addEventListener("pause", ()=>{
-  document.getElementById("btnPlay").innerText = "▶️";
-});
-
-/* FAVORITO */
-function toggleFavoritoRadio(url){
-  const radio = window.radiosAtuais.find(r => r.url_resolved === url);
+/* ====== FAVORITOS ====== */
+function toggleFavoritoRadio(url) {
+  const radio = (window.radiosAtuais || []).find(r => r.url_resolved === url);
+  if (!radio) return;
 
   let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-
   const existe = favoritos.find(r => r.url_resolved === url);
 
-  if(existe){
+  if (existe) {
     favoritos = favoritos.filter(r => r.url_resolved !== url);
-  }else{
+    toast('Removida dos favoritos', 'info');
+  } else {
     favoritos.unshift(radio);
+    toast('Adicionada aos favoritos', 'success');
   }
 
   localStorage.setItem("favoritos", JSON.stringify(favoritos));
-
   render(window.radiosAtuais);
   atualizarBotaoFav();
 }
 
-/* FAVORITO PELO PLAYER */
-function toggleFavoritoAtual(){
-  if(!radioAtual) return;
-
+function toggleFavoritoAtual() {
+  if (!radioAtual) return;
   toggleFavoritoRadio(radioAtual.url_resolved);
 }
 
-/* ATUALIZA ÍCONE */
-function atualizarBotaoFav(){
-  if(!radioAtual) return;
-
+function atualizarBotaoFav() {
+  if (!radioAtual) return;
   const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-
   const isFav = favoritos.some(r => r.url_resolved === radioAtual.url_resolved);
-
-  document.getElementById("btnFav").innerText = isFav ? "❤️" : "🤍";
+  const btn = document.getElementById("btnFav");
+  btn.classList.toggle('faved', isFav);
+  btn.innerHTML = isFav
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>';
 }
 
-/* HISTÓRICO */
-function mostrarHistorico(){
-  const hist = JSON.parse(localStorage.getItem("historico")) || [];
-  render(hist);
-}
+/* ====== AUTOCOMPLETE ====== */
+async function autocomplete() {
+  const termo = document.getElementById("busca").value.trim();
+  const sugestoesEl = document.getElementById("sugestoes");
 
-/* FAVORITOS */
-function mostrarFavoritos(){
-  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-  render(favoritos);
-}
-
-/* AUTOCOMPLETE */
-async function autocomplete(){
-  const termo = document.getElementById("busca").value;
-
-  if(termo.length < 2){
-    document.getElementById("sugestoes").innerHTML="";
+  if (termo.length < 2) {
+    sugestoesEl.innerHTML = "";
     return;
   }
 
-  const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${termo}&limit=5`);
-  const data = await res.json();
-
-  let html = "";
-
-  data.forEach(r=>{
-    html += `<div onclick='selecionarSugestao("${r.name}")' style="padding:8px; cursor:pointer;">
-      ${r.name}
-    </div>`;
-  });
-
-  document.getElementById("sugestoes").innerHTML = html;
+  try {
+    const res = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(termo)}&limit=5`);
+    const data = await res.json();
+    sugestoesEl.innerHTML = data.map(r =>
+      `<div onclick='selecionarSugestao("${r.name.replace(/'/g, "\\'")}")'>${r.name}</div>`
+    ).join('');
+  } catch (e) {
+    sugestoesEl.innerHTML = "";
+  }
 }
 
-function selecionarSugestao(nome){
+function selecionarSugestao(nome) {
   document.getElementById("busca").value = nome;
-  document.getElementById("sugestoes").innerHTML="";
+  document.getElementById("sugestoes").innerHTML = "";
   buscarRadio();
 }
 
-/* TIMER */
+/* Fechar sugestoes ao clicar fora */
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById("sugestoes").innerHTML = "";
+  }
+});
+
+/* ====== TIMER ====== */
 let timerSleep = null;
-
-function definirTimer(segundos){
+function definirTimer(segundos) {
   cancelarTimer();
+  if (!segundos) return;
 
-  if(!segundos) return;
+  const mins = segundos / 60;
+  toast(`Timer: ${mins} minutos para desligar`, 'info');
 
-  timerSleep = setTimeout(()=>{
+  timerSleep = setTimeout(() => {
     audio.pause();
-    alert("⏱️ Rádio desligada automaticamente");
+    toast('Radio desligada automaticamente', 'warn');
   }, segundos * 1000);
 }
-
-function cancelarTimer(){
-  if(timerSleep){
+function cancelarTimer() {
+  if (timerSleep) {
     clearTimeout(timerSleep);
     timerSleep = null;
+    toast('Timer cancelado', 'info');
   }
 }
 
-/* PWA */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+/* ====== KEYBOARD SHORTCUTS ====== */
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  if (e.code === 'ArrowUp') { e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); volumeSlider.value = audio.volume; atualizarIconeVolume(); }
+  if (e.code === 'ArrowDown') { e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); volumeSlider.value = audio.volume; atualizarIconeVolume(); }
+});
+
+/* ====== MEDIA SESSION API ====== */
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play', () => audio.play());
+  navigator.mediaSession.setActionHandler('pause', () => audio.pause());
 }
 
-/* INICIALIZAÇÃO */
-window.onload = ()=>{
+/* ====== PWA ====== */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+/* ====== INIT ====== */
+window.onload = () => {
   carregar();
-
   const ultima = JSON.parse(localStorage.getItem("ultima"));
-  if(ultima){
-    playRadio(ultima); // 🔥 AUTO PLAY
-  }
-}
+  if (ultima) playRadio(ultima);
+};
 
-  /* Ocultar */
-  document.addEventListener('contextmenu', e => e.preventDefault());
-
+/* Disable context menu */
+document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
-  if (
-    e.key === 'F12' ||
-    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
-    (e.ctrlKey && e.key === 'u')
-  ) {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
     e.preventDefault();
   }
 });
